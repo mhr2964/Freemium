@@ -1,6 +1,7 @@
 import { Router } from "express";
 import bcrypt from "bcrypt";
 import { getDb } from "../config/db.js";
+import { requireAuth } from "../middleware/requireAuth.js";
 import { User } from "../models/User.js";
 import { formatUser, setSessionUser } from "../utils/auth.js";
 
@@ -78,24 +79,9 @@ router.post("/logout", (req, res) => {
   });
 });
 
-router.get("/me", async (req, res) => {
-  if (!req.session.user?.id) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-
-  await getDb();
-
-  const user = await User.findById(req.session.user.id);
-
-  if (!user) {
-    req.session.destroy(() => {});
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-
-  setSessionUser(req, user);
-
+router.get("/me", requireAuth, async (req, res) => {
   return res.json({
-    user: formatUser(user)
+    user: formatUser(req.currentUser)
   });
 });
 
