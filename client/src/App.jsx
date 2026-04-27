@@ -224,6 +224,21 @@ function ProtectedRoute({ isLoading, user, children }) {
   return children;
 }
 
+function BillingStatus({ title, message }) {
+  return (
+    <main className="status-shell">
+      <section className="auth-card">
+        <p className="eyebrow">Billing</p>
+        <h1>{title}</h1>
+        <p>{message}</p>
+        <Link className="status-link" to="/dashboard">
+          Return to dashboard
+        </Link>
+      </section>
+    </main>
+  );
+}
+
 export default function App() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -283,6 +298,24 @@ export default function App() {
           <ProtectedRoute isLoading={isLoading} user={user}>
             <Dashboard user={user} onLogout={() => setUser(null)} />
           </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/billing/success"
+        element={
+          <BillingStatus
+            title="Checkout completed"
+            message="If the webhook has been delivered, your next authenticated request will reflect premium access."
+          />
+        }
+      />
+      <Route
+        path="/billing/cancel"
+        element={
+          <BillingStatus
+            title="Checkout canceled"
+            message="Your account is unchanged. You can return to the dashboard and try again at any time."
+          />
         }
       />
       <Route

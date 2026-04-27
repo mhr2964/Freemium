@@ -112,6 +112,11 @@ button:disabled {
   color: #7c2d12;
 }
 
+.status-link {
+  color: #7c2d12;
+  font-weight: 600;
+}
+
 .dashboard-card {
   width: min(100%, 720px);
 }
