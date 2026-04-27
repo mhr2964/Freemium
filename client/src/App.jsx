@@ -7,6 +7,7 @@ import {
   useLocation,
   useNavigate
 } from "react-router-dom";
+import PremiumGate from "./components/PremiumGate";
 
 const apiBaseUrl = import.meta.env.VITE_API_URL || "";
 
@@ -96,6 +97,43 @@ function Dashboard({ user, onLogout }) {
   const navigate = useNavigate();
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUpgrading, setIsUpgrading] = useState(false);
+  const [premiumData, setPremiumData] = useState("");
+
+  useEffect(() => {
+    if (!user.isPremium) {
+      setPremiumData("");
+      return undefined;
+    }
+
+    const controller = new AbortController();
+
+    async function loadPremiumData() {
+      try {
+        const res = await request("/api/premium/example", {
+          signal: controller.signal
+        });
+
+        if (!res.ok) {
+          setError("Failed to load premium content");
+          return;
+        }
+
+        const payload = await res.json();
+        setPremiumData(payload.data);
+      } catch (fetchError) {
+        if (fetchError.name !== "AbortError") {
+          setError("Failed to load premium content");
+        }
+      }
+    }
+
+    loadPremiumData();
+
+    return () => {
+      controller.abort();
+    };
+  }, [user.isPremium]);
 
   async function handleLogout() {
     setError("");
@@ -120,6 +158,30 @@ function Dashboard({ user, onLogout }) {
     }
   }
 
+  async function handleUpgrade() {
+    setError("");
+    setIsUpgrading(true);
+
+    try {
+      const res = await request("/api/billing/create-checkout", {
+        method: "POST"
+      });
+
+      if (!res.ok) {
+        const payload = await res.json();
+        setError(payload.error || "Upgrade failed");
+        return;
+      }
+
+      const payload = await res.json();
+      window.location.assign(payload.url);
+    } catch {
+      setError("Upgrade failed");
+    } finally {
+      setIsUpgrading(false);
+    }
+  }
+
   return (
     <main className="dashboard-shell">
       <section className="dashboard-card">
@@ -134,6 +196,14 @@ function Dashboard({ user, onLogout }) {
         </div>
         <p>Your session is active.</p>
         <p>Premium status: {user.isPremium ? "Premium" : "Free"}</p>
+        <PremiumGate isPremium={user.isPremium} onUpgrade={handleUpgrade}>
+          <section className="premium-panel">
+            <p className="eyebrow">Premium Content</p>
+            <h2>Gated example</h2>
+            <p>{premiumData || "Loading premium content..."}</p>
+          </section>
+        </PremiumGate>
+        {!user.isPremium && isUpgrading ? <p>Redirecting to Stripe...</p> : null}
         {error ? <p className="form-error">{error}</p> : null}
       </section>
     </main>

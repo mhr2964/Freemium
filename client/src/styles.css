@@ -69,6 +69,10 @@ label,
   color: #52606d;
 }
 
+h2 {
+  margin: 0 0 8px;
+}
+
 input {
   width: 100%;
   padding: 12px 14px;
@@ -117,6 +121,15 @@ button:disabled {
   justify-content: space-between;
   gap: 16px;
   align-items: center;
+}
+
+.premium-cta,
+.premium-panel {
+  margin-top: 24px;
+  padding: 24px;
+  border-radius: 20px;
+  background: #f8fafc;
+  border: 1px solid #d9e2ec;
 }
 
 @media (max-width: 640px) {
