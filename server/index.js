@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import cors from "cors";
 import express from "express";
+import authRouter from "./routes/auth.js";
 import healthRouter from "./routes/health.js";
 import { createSessionMiddleware } from "./config/session.js";
 
@@ -22,6 +23,7 @@ async function startServer() {
   app.use(sessionMiddleware);
 
   app.use("/api/health", healthRouter);
+  app.use("/api/auth", authRouter);
 
   app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
